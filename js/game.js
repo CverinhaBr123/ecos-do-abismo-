@@ -155,6 +155,8 @@ const runRoomTitle = document.getElementById('run-room-title');
 const runRoomDescription = document.getElementById('run-room-description');
 const resolveRoute = document.getElementById('resolve-route');
 const runLogList = document.getElementById('run-log-list');
+const mapHeroName = document.getElementById('map-hero-name');
+const mapHeroRole = document.getElementById('map-hero-role');
 
 let selectedCharacterId = loadStoredCharacterId() || characters[0].id;
 let runState = null;
@@ -210,6 +212,10 @@ function showScreen(screenToShow) {
   });
 
   syncAudioForScreen(screenToShow);
+
+  if (screenToShow !== runScreen && window.EcosMap) {
+    window.EcosMap.stop();
+  }
 }
 
 function getCharacterMusicPath(characterId) {
@@ -446,34 +452,14 @@ function renderRunScreen() {
   if (!runState) return;
 
   const character = characters.find((item) => item.id === runState.characterId);
-  const selectedRoute = routeOptions.find((route) => route.id === runState.selectedRouteId) || routeOptions[0];
 
   runDepth.textContent = runState.depth;
   runHealth.textContent = `${Math.max(runState.health, 0)}/${runState.maxHealth}`;
   runEchoes.textContent = runState.echoes;
   runTension.textContent = runState.tension;
 
-  runHeroImage.src = character.image;
-  runHeroImage.alt = character.name;
-  runHeroRole.textContent = character.role;
-  runHeroName.textContent = character.name;
-  runHeroItem.textContent = character.item;
-  runHeroSummary.textContent = character.summary;
-  renderMiniStats(character);
-
-  runRoomTitle.textContent = selectedRoute.name;
-  runRoomDescription.textContent = selectedRoute.summary;
-  resolveRoute.disabled = runState.health <= 0;
-  resolveRoute.textContent = runState.health <= 0 ? 'Run encerrada' : 'Explorar rota';
-
-  renderRoutes(character);
-
-  runLogList.innerHTML = '';
-  runState.log.slice(0, 6).forEach((entry) => {
-    const item = document.createElement('li');
-    item.textContent = entry;
-    runLogList.appendChild(item);
-  });
+  mapHeroName.textContent = character.name;
+  mapHeroRole.textContent = character.shortRole;
 }
 
 function startRun(character) {
@@ -482,6 +468,11 @@ function startRun(character) {
   runState = createRunState(character);
   renderRunScreen();
   showScreen(runScreen);
+  requestAnimationFrame(() => {
+    if (window.EcosMap) {
+      window.EcosMap.start({ character, runState });
+    }
+  });
   showToast(`${character.name} entrou no abismo.`);
 }
 
@@ -583,9 +574,11 @@ function setupMenuActions() {
     showScreen(menuScreen);
   });
 
-  resolveRoute.addEventListener('click', () => {
-    resolveSelectedRoute();
-  });
+  if (resolveRoute) {
+    resolveRoute.addEventListener('click', () => {
+      resolveSelectedRoute();
+    });
+  }
 }
 
 window.addEventListener('load', () => {
