@@ -21,6 +21,7 @@ Esta versão do projeto já inclui:
 - fundo customizado opcional para a tela inicial
 - música automática no menu principal
 - preparo para músicas individuais na seleção de personagens
+- primeiras habilidades lançáveis no mapa com cooldown
 
 ## Estrutura
 
@@ -49,6 +50,10 @@ ecos-do-abismo-codex/
 │     ├─ menu-theme.mp3
 │     └─ characters/
 ├─ docs/
+│  ├─ ASSETS.md
+│  ├─ GITHUB_PAGES.md
+│  ├─ MAP_DESIGN.md
+│  ├─ asset_credits.md
 │  └─ project_state.md
 └─ legacy/
    ├─ menu_inicial_original.html
@@ -150,9 +155,15 @@ docs/asset_credits.md
 
 1. adicionar sprites/frames de caminhada para os heróis
 2. criar inimigos simples no Átrio das Correntes
-3. implementar dano, colisão de ataque e habilidades
+3. conectar dano e colisão de ataque às habilidades
 4. adicionar inventário e uso de item único
 5. expandir sistema de salas, inimigos e progressão
+
+## Sprites de personagem
+
+O mapa já usa imagens temporárias dos heróis, mas para eles andarem com realismo precisamos de animações. O pacote mínimo por personagem é `idle`, `walk`, `run`, `cast/attack`, `hit` e `death`, com 4 direções diagonais no mínimo ou 8 direções no ideal.
+
+Se o personagem for criado em 3D, podemos renderizar esse modelo como sprite sheet. Isso dá aparência mais realista sem obrigar o jogo inteiro a virar 3D.
 
 ## Observação
 
