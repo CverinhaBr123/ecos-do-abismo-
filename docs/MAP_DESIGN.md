@@ -8,7 +8,8 @@ Primeiro mapa jogável para testar:
 - leitura visual do chão e obstáculos
 - movimentação com teclado
 - câmera seguindo o jogador
-- colisão básica antes de inimigos e habilidades
+- colisão básica antes de inimigos
+- primeiras habilidades lançáveis por personagem
 
 ## Fantasia
 
@@ -33,7 +34,27 @@ Cada tile é desenhado em projeção isométrica/2,5D:
 ```text
 WASD ou setas: mover
 Shift: correr
-Espaço: pulso visual de teste
+J, 1 ou Espaço: lançar habilidade ativa
+```
+
+## Habilidades atuais
+
+As habilidades ainda são protótipos visuais, sem dano aplicado porque os inimigos ainda não existem no mapa. Elas já servem para testar direção, alcance, cooldown, leitura no cenário e sensação de cada personagem.
+
+```text
+Guerreiro Anão: Fúria
+- avanço curto na direção atual
+- arco de impacto laranja à frente do herói
+- base futura: golpe frontal com empurrão
+
+Pônei Mágico: Dança do Crepúsculo
+- avanço leve
+- explosão circular lilás/ciano em área
+- base futura: controle de grupo e dano em área
+
+Necromante: Mão dos Mortos
+- projétil espectral lançado na direção atual
+- base futura: maldição, lentidão ou roubo de vida
 ```
 
 ## Personagem no mapa
@@ -45,6 +66,21 @@ assets/images/map-sprites/
 ```
 
 Eles são recortes das artes atuais dos heróis, pensados para validar escala, posição no tile e leitura do personagem no cenário. A próxima versão ideal é trocar esses standees por sprite sheets de caminhada com direções.
+
+Para o movimento parecer jogo de verdade, cada personagem precisa de frames separados por ação. O pacote mínimo recomendado para 2,5D é:
+
+```text
+idle: 4 a 8 frames
+walk: 6 a 10 frames
+run: 6 a 10 frames
+cast/attack: 6 a 12 frames
+hit: 3 a 6 frames
+death: 8 a 12 frames
+direções mínimas: 4 diagonais isométricas
+direções ideais: 8 direções
+formato: PNG ou WebP com fundo transparente
+âncora: pés sempre no mesmo ponto do frame
+```
 
 ## Personalidade visual
 
