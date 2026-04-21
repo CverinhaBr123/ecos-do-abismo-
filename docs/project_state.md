@@ -18,6 +18,7 @@ RPG roguelike em HTML.
 - menu principal
 - tela de seleção de personagens
 - tela inicial da run
+- mapa jogável 2,5D: Átrio das Correntes
 
 ## Sistemas prontos
 - seleção de personagem com persistência em `localStorage`
@@ -28,6 +29,9 @@ RPG roguelike em HTML.
 - música automática do menu usando `assets/audio/menu-theme.mp3`, ativada por `js/asset-config.js`
 - preparo para trilhas individuais por personagem na tela de seleção
 - arquivos de preparo para GitHub Pages
+- movimento por teclado no primeiro mapa
+- câmera seguindo o jogador
+- colisão básica com paredes, pilares, braseiros e abismos
 
 ## Personagem 1 — Guerreiro Anão
 
@@ -97,7 +101,7 @@ Conjurador sombrio focado em invocações, maldições e desgaste.
 **Grimório das Cinzas**
 
 ## Próxima etapa mais natural
-Depois da tela inicial da run:
-- criar distribuição de pontos do personagem
-- transformar as rotas em encontros de combate com inimigos
-- adicionar inventário e efeitos do item único
+Depois do protótipo de mapa:
+- adicionar sprites/frames de caminhada
+- criar inimigos simples no Átrio das Correntes
+- implementar dano, colisão de ataque e habilidades iniciais
