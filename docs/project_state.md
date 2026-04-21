@@ -25,7 +25,8 @@ RPG roguelike em HTML.
 - três rotas iniciais com risco, recompensa e teste baseado nos atributos do personagem
 - registro da run com os resultados das ações
 - suporte a fundo customizado em `assets/images/menu/fundo_inicial_custom.png`, ativado por `js/asset-config.js`
-- botão opcional de música usando `assets/audio/menu-theme.mp3`, ativado por `js/asset-config.js`
+- música automática do menu usando `assets/audio/menu-theme.mp3`, ativada por `js/asset-config.js`
+- preparo para trilhas individuais por personagem na tela de seleção
 - arquivos de preparo para GitHub Pages
 
 ## Personagem 1 — Guerreiro Anão
