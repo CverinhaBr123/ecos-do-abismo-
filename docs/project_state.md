@@ -32,6 +32,8 @@ RPG roguelike em HTML.
 - movimento por teclado no primeiro mapa
 - câmera seguindo o jogador
 - colisão básica com paredes, pilares, braseiros e abismos
+- primeiras habilidades lançáveis no mapa com `J`, `1` ou `Espaço`
+- HUD de habilidade com nome e cooldown
 
 ## Personagem 1 — Guerreiro Anão
 
@@ -104,4 +106,4 @@ Conjurador sombrio focado em invocações, maldições e desgaste.
 Depois do protótipo de mapa:
 - adicionar sprites/frames de caminhada
 - criar inimigos simples no Átrio das Correntes
-- implementar dano, colisão de ataque e habilidades iniciais
+- conectar dano e colisão real às habilidades iniciais
