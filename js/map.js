@@ -23,6 +23,18 @@
     }
   };
 
+  const characterSpritePaths = {
+    dwarf: 'assets/images/map-sprites/dwarf.png',
+    pony: 'assets/images/map-sprites/pony.png',
+    necromancer: 'assets/images/map-sprites/necromancer.png'
+  };
+
+  const characterSpriteSettings = {
+    dwarf: { scale: 0.72, anchorY: 230 },
+    pony: { scale: 0.7, anchorY: 224 },
+    necromancer: { scale: 0.76, anchorY: 236 }
+  };
+
   let canvas = null;
   let ctx = null;
   let statusElement = null;
@@ -35,6 +47,7 @@
   let statusText = '';
   let cssWidth = 0;
   let cssHeight = 0;
+  const characterSprites = new Map();
 
   const keys = new Set();
   const camera = { x: 0, y: 0 };
@@ -111,6 +124,7 @@
 
     ctx = canvas.getContext('2d');
     activeCharacter = options.character;
+    loadCharacterSprite(activeCharacter);
     resetPlayer(activeCharacter);
     setupListeners();
     resize();
@@ -144,6 +158,29 @@
     const world = tileToWorld(player.x, player.y);
     camera.x = world.x;
     camera.y = world.y;
+  }
+
+  function loadCharacterSprite(character) {
+    if (!character || characterSprites.has(character.id)) return;
+
+    const image = new Image();
+    image.onload = () => {
+      characterSprites.set(character.id, {
+        image,
+        ready: true
+      });
+    };
+    image.onerror = () => {
+      characterSprites.set(character.id, {
+        image: null,
+        ready: false
+      });
+    };
+    characterSprites.set(character.id, {
+      image,
+      ready: false
+    });
+    image.src = characterSpritePaths[character.id] || character.image;
   }
 
   function setupListeners() {
@@ -478,6 +515,7 @@
     const colors = characterColors[activeCharacter.id] || characterColors.dwarf;
     const point = tileToScreen(player.x, player.y);
     const bob = player.moving ? Math.sin(performance.now() / 90) * 3 : 0;
+    const sprite = characterSprites.get(activeCharacter.id);
 
     ctx.save();
     ctx.translate(point.x, point.y + bob);
@@ -495,6 +533,49 @@
       ctx.stroke();
     }
 
+    if (sprite && sprite.ready && sprite.image) {
+      drawCharacterSprite(sprite.image, colors);
+      ctx.restore();
+      return;
+    }
+
+    drawFallbackPlayer(colors);
+    ctx.restore();
+  }
+
+  function drawCharacterSprite(image, colors) {
+    const settings = characterSpriteSettings[activeCharacter.id] || characterSpriteSettings.dwarf;
+    const scale = settings.scale;
+    const spriteWidth = image.width * scale;
+    const spriteHeight = image.height * scale;
+    const drawX = -spriteWidth / 2;
+    const drawY = -(settings.anchorY * scale) + 18;
+    const lean = player.moving ? player.facingX * 0.035 : 0;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const glow = ctx.createRadialGradient(0, -30, 8, 0, -30, 54);
+    glow.addColorStop(0, colors.glow);
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(0, -30, 54, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.transform(1, lean, 0, 1, 0, 0);
+    ctx.drawImage(image, drawX, drawY, spriteWidth, spriteHeight);
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(0, 10, 19, 7, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  function drawFallbackPlayer(colors) {
     const glow = ctx.createRadialGradient(0, 0, 4, 0, 0, 36);
     glow.addColorStop(0, colors.glow);
     glow.addColorStop(1, 'rgba(0,0,0,0)');
@@ -522,7 +603,6 @@
     ctx.moveTo(0, -4);
     ctx.lineTo(player.facingX * 16, player.facingY * 10 + 5);
     ctx.stroke();
-    ctx.restore();
   }
 
   function drawForegroundFog() {
