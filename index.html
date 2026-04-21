@@ -116,8 +116,8 @@
     <div class="run-layout">
       <header class="run-hud glass-panel">
         <div class="run-title-block">
-          <p class="eyebrow">Run em andamento</p>
-          <h2>Entrada do Abismo</h2>
+          <p class="eyebrow">Mapa 01</p>
+          <h2>Átrio das Correntes</h2>
         </div>
         <div class="resource-strip" aria-label="Estado da run">
           <span><strong id="run-depth">1</strong> profundidade</span>
@@ -131,45 +131,29 @@
         </div>
       </header>
 
-      <div class="run-grid">
-        <aside class="run-hero glass-panel">
-          <div class="run-hero-top">
-            <img id="run-hero-image" class="run-hero-image" src="" alt="" />
-            <div>
-              <p id="run-hero-role" class="eyebrow"></p>
-              <h3 id="run-hero-name"></h3>
-              <p><strong>Item único:</strong> <span id="run-hero-item"></span></p>
-            </div>
-          </div>
-          <p id="run-hero-summary" class="run-hero-summary"></p>
-          <div id="run-hero-stats" class="mini-stats"></div>
-        </aside>
+      <main class="exploration-shell glass-panel">
+        <canvas id="map-canvas" class="map-canvas" width="1280" height="720" aria-label="Mapa jogável em 2,5D"></canvas>
 
-        <main class="run-stage glass-panel">
-          <div class="stage-copy">
-            <p class="eyebrow">Câmara atual</p>
-            <h3 id="run-room-title">Escolha uma rota</h3>
-            <p id="run-room-description">O portal range atrás de você. À frente, três caminhos respiram como se esperassem uma decisão.</p>
-          </div>
+        <section class="map-briefing">
+          <p class="eyebrow">Exploração</p>
+          <h3>Encontre o portão leste</h3>
+          <p>A passarela central atravessa o vazio até uma porta presa por correntes antigas.</p>
+        </section>
 
-          <div id="route-grid" class="route-grid" aria-label="Rotas disponíveis"></div>
+        <div class="map-hero-chip">
+          <span id="map-hero-name">Herói</span>
+          <small id="map-hero-role">Estilo</small>
+        </div>
 
-          <div class="run-actions">
-            <button id="resolve-route" class="primary-btn">Explorar rota</button>
-          </div>
-        </main>
-
-        <aside class="run-log glass-panel">
-          <h3>Registro</h3>
-          <ol id="run-log-list" class="log-list"></ol>
-        </aside>
-      </div>
+        <div id="map-status" class="map-status">x: 0 y: 0</div>
+      </main>
     </div>
   </section>
 
   <div id="toast" class="toast"></div>
 
   <script src="js/asset-config.js"></script>
+  <script src="js/map.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>
