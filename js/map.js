@@ -35,9 +35,32 @@
     necromancer: { scale: 0.76, anchorY: 236 }
   };
 
+  const abilityConfigs = {
+    dwarf: {
+      name: 'Fúria',
+      cooldown: 1.2,
+      color: 'rgba(255, 157, 65, 0.82)',
+      accent: 'rgba(255, 220, 142, 0.95)'
+    },
+    pony: {
+      name: 'Dança do Crepúsculo',
+      cooldown: 1.6,
+      color: 'rgba(199, 162, 255, 0.78)',
+      accent: 'rgba(134, 255, 248, 0.82)'
+    },
+    necromancer: {
+      name: 'Mão dos Mortos',
+      cooldown: 1.8,
+      color: 'rgba(115, 224, 189, 0.76)',
+      accent: 'rgba(169, 96, 255, 0.8)'
+    }
+  };
+
   let canvas = null;
   let ctx = null;
   let statusElement = null;
+  let abilityNameElement = null;
+  let abilityStateElement = null;
   let animationFrame = null;
   let running = false;
   let listenersReady = false;
@@ -47,6 +70,8 @@
   let statusText = '';
   let cssWidth = 0;
   let cssHeight = 0;
+  let abilityCooldown = 0;
+  const abilityEffects = [];
   const characterSprites = new Map();
 
   const keys = new Set();
@@ -120,12 +145,17 @@
   function start(options) {
     canvas = document.getElementById('map-canvas');
     statusElement = document.getElementById('map-status');
+    abilityNameElement = document.getElementById('map-ability-name');
+    abilityStateElement = document.getElementById('map-ability-state');
     if (!canvas) return;
 
     ctx = canvas.getContext('2d');
     activeCharacter = options.character;
     loadCharacterSprite(activeCharacter);
     resetPlayer(activeCharacter);
+    abilityCooldown = 0;
+    abilityEffects.length = 0;
+    updateAbilityHud();
     setupListeners();
     resize();
 
@@ -211,12 +241,12 @@
   function handleKeyDown(event) {
     if (!isRunScreenActive()) return;
 
-    if (isMovementKey(event.key) || event.key === ' ') {
+    if (isMovementKey(event.key) || isAbilityKey(event.key)) {
       event.preventDefault();
     }
 
     keys.add(event.key.toLowerCase());
-    if (event.key === ' ') pulse = 1;
+    if (isAbilityKey(event.key) && !event.repeat) castAbility();
   }
 
   function handleKeyUp(event) {
@@ -229,6 +259,10 @@
       'w', 'a', 's', 'd', 'W', 'A', 'S', 'D',
       'Shift'
     ].includes(key);
+  }
+
+  function isAbilityKey(key) {
+    return [' ', 'j', 'J', '1'].includes(key);
   }
 
   function isRunScreenActive() {
@@ -281,11 +315,113 @@
     }
 
     if (pulse > 0) pulse = Math.max(0, pulse - dt * 2.4);
+    if (abilityCooldown > 0) abilityCooldown = Math.max(0, abilityCooldown - dt);
+    updateAbilityEffects(dt);
 
     const world = tileToWorld(player.x, player.y);
     camera.x += (world.x - camera.x) * 0.12;
     camera.y += (world.y - camera.y - 18) * 0.12;
+    updateAbilityHud();
     updateStatus();
+  }
+
+  function castAbility() {
+    const ability = abilityConfigs[activeCharacter.id] || abilityConfigs.dwarf;
+    if (abilityCooldown > 0) return;
+
+    abilityCooldown = ability.cooldown;
+    pulse = 1;
+
+    if (activeCharacter.id === 'dwarf') {
+      castDwarfAbility(ability);
+    } else if (activeCharacter.id === 'pony') {
+      castPonyAbility(ability);
+    } else {
+      castNecromancerAbility(ability);
+    }
+  }
+
+  function castDwarfAbility(ability) {
+    const direction = normalizedFacing();
+    const dash = 0.82;
+    tryMove(direction.x * dash, direction.y * dash);
+
+    abilityEffects.push({
+      type: 'slash',
+      x: player.x + direction.x * 0.55,
+      y: player.y + direction.y * 0.55,
+      dirX: direction.x,
+      dirY: direction.y,
+      age: 0,
+      duration: 0.42,
+      color: ability.color,
+      accent: ability.accent
+    });
+  }
+
+  function castPonyAbility(ability) {
+    const direction = normalizedFacing();
+    const dash = 0.48;
+    tryMove(direction.x * dash, direction.y * dash);
+
+    abilityEffects.push({
+      type: 'dream-burst',
+      x: player.x,
+      y: player.y,
+      age: 0,
+      duration: 0.74,
+      color: ability.color,
+      accent: ability.accent
+    });
+  }
+
+  function castNecromancerAbility(ability) {
+    const direction = normalizedFacing();
+
+    abilityEffects.push({
+      type: 'spectral-hand',
+      x: player.x + direction.x * 0.35,
+      y: player.y + direction.y * 0.35,
+      dirX: direction.x,
+      dirY: direction.y,
+      age: 0,
+      duration: 0.86,
+      color: ability.color,
+      accent: ability.accent
+    });
+  }
+
+  function updateAbilityEffects(dt) {
+    for (let i = abilityEffects.length - 1; i >= 0; i -= 1) {
+      const effect = abilityEffects[i];
+      effect.age += dt;
+
+      if (effect.type === 'spectral-hand') {
+        const speed = 5.6;
+        effect.x += effect.dirX * speed * dt;
+        effect.y += effect.dirY * speed * dt;
+      }
+
+      if (effect.age >= effect.duration) abilityEffects.splice(i, 1);
+    }
+  }
+
+  function normalizedFacing() {
+    const length = Math.hypot(player.facingX, player.facingY) || 1;
+    return {
+      x: player.facingX / length,
+      y: player.facingY / length
+    };
+  }
+
+  function updateAbilityHud() {
+    if (!abilityNameElement || !abilityStateElement || !activeCharacter) return;
+
+    const ability = abilityConfigs[activeCharacter.id] || abilityConfigs.dwarf;
+    abilityNameElement.textContent = ability.name;
+    abilityStateElement.textContent = abilityCooldown > 0
+      ? `${abilityCooldown.toFixed(1)}s`
+      : 'Pronta';
   }
 
   function tryMove(dx, dy) {
@@ -348,6 +484,13 @@
     drawables.push({
       sort: player.x + player.y + 0.25,
       draw: drawPlayer
+    });
+
+    abilityEffects.forEach((effect) => {
+      drawables.push({
+        sort: effect.x + effect.y + 0.35,
+        draw: () => drawAbilityEffect(effect)
+      });
     });
 
     drawables.sort((a, b) => a.sort - b.sort);
@@ -511,6 +654,97 @@
     ctx.restore();
   }
 
+  function drawAbilityEffect(effect) {
+    if (effect.type === 'slash') {
+      drawSlashEffect(effect);
+    } else if (effect.type === 'dream-burst') {
+      drawDreamBurstEffect(effect);
+    } else if (effect.type === 'spectral-hand') {
+      drawSpectralHandEffect(effect);
+    }
+  }
+
+  function drawSlashEffect(effect) {
+    const progress = effect.age / effect.duration;
+    const point = tileToScreen(effect.x, effect.y);
+    const angle = Math.atan2(effect.dirY + effect.dirX, effect.dirX - effect.dirY);
+    const alpha = 1 - progress;
+
+    ctx.save();
+    ctx.translate(point.x, point.y - 20);
+    ctx.rotate(angle);
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = effect.accent;
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.arc(0, 0, 34 + progress * 28, -0.9, 0.9);
+    ctx.stroke();
+    ctx.strokeStyle = effect.color;
+    ctx.lineWidth = 16;
+    ctx.globalAlpha = alpha * 0.36;
+    ctx.beginPath();
+    ctx.arc(0, 0, 42 + progress * 34, -0.75, 0.75);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawDreamBurstEffect(effect) {
+    const progress = effect.age / effect.duration;
+    const point = tileToScreen(effect.x, effect.y);
+    const radiusX = 32 + progress * 110;
+    const radiusY = 14 + progress * 46;
+    const alpha = 1 - progress;
+
+    ctx.save();
+    ctx.translate(point.x, point.y + 4);
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = effect.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = effect.accent;
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 9; i += 1) {
+      const angle = i * 0.7 + progress * 4;
+      const x = Math.cos(angle) * radiusX * 0.82;
+      const y = Math.sin(angle) * radiusY * 0.82;
+      ctx.beginPath();
+      ctx.moveTo(x - 4, y);
+      ctx.lineTo(x + 4, y);
+      ctx.moveTo(x, y - 4);
+      ctx.lineTo(x, y + 4);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawSpectralHandEffect(effect) {
+    const progress = effect.age / effect.duration;
+    const point = tileToScreen(effect.x, effect.y);
+    const alpha = Math.sin(progress * Math.PI);
+
+    ctx.save();
+    ctx.translate(point.x, point.y - 18);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = effect.color;
+    ctx.strokeStyle = effect.accent;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 18, 26, -0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    for (let i = -2; i <= 2; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(i * 6, -16);
+      ctx.quadraticCurveTo(i * 8, -34 - Math.abs(i) * 3, i * 12, -42);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   function drawPlayer() {
     const colors = characterColors[activeCharacter.id] || characterColors.dwarf;
     const point = tileToScreen(player.x, player.y);
@@ -652,7 +886,9 @@
         running,
         player: { x: player.x, y: player.y },
         tile: tileAt(player.x, player.y),
-        statusText
+        statusText,
+        abilityCooldown,
+        abilityEffects: abilityEffects.length
       };
     }
   };
