@@ -37,6 +37,10 @@ ecos-do-abismo-codex/
 │  ├─ images/
 │     ├─ menu/
 │     │  └─ tela_inicial.png
+│     ├─ map-sprites/
+│     │  ├─ dwarf.png
+│     │  ├─ pony.png
+│     │  └─ necromancer.png
 │     └─ characters/
 │        ├─ guerreiro_anao.png
 │        ├─ ponei_magico.png
