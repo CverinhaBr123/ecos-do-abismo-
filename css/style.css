@@ -319,10 +319,6 @@ img {
   box-shadow: 0 12px 28px rgba(0,0,0,0.34), 0 0 18px rgba(255,92,92,0.2);
 }
 
-.menu-btn--audio {
-  border-color: rgba(134, 255, 248, 0.24);
-}
-
 .version {
   margin-top: 18px;
   text-align: center;
