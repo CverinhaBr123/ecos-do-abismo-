@@ -16,6 +16,7 @@ Esta versão do projeto já inclui:
 - tela inicial da run
 - HUD com profundidade, vida, ecos e tensão
 - 3 rotas iniciais clicáveis com risco, recompensa e resolução simples
+- primeiro mapa 2,5D jogável para teste de movimentação
 - preparo para GitHub Pages
 - fundo customizado opcional para a tela inicial
 - música automática no menu principal
@@ -30,6 +31,7 @@ ecos-do-abismo-codex/
 │  └─ style.css
 ├─ js/
 │  ├─ asset-config.js
+│  ├─ map.js
 │  └─ game.js
 ├─ assets/
 │  ├─ images/
@@ -142,10 +144,10 @@ docs/asset_credits.md
 
 ## Próximos passos sugeridos
 
-1. implementar distribuição de atributos antes da run
-2. criar encontros de combate reais para cada rota
-3. adicionar inventário e uso de item único
-4. criar recompensas permanentes entre runs
+1. adicionar sprites/frames de caminhada para os heróis
+2. criar inimigos simples no Átrio das Correntes
+3. implementar dano, colisão de ataque e habilidades
+4. adicionar inventário e uso de item único
 5. expandir sistema de salas, inimigos e progressão
 
 ## Observação
