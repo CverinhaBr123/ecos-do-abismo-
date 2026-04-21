@@ -29,7 +29,7 @@ assets/images/menu/tela_inicial.png
 
 ## Música da tela inicial
 
-Para ativar o botão de música do menu, coloque o MP3 neste caminho exato:
+Para ativar a música do menu, coloque o MP3 neste caminho exato:
 
 ```text
 assets/audio/menu-theme.mp3
@@ -41,6 +41,28 @@ Depois abra `js/asset-config.js` e altere:
 enableMenuMusic: true
 ```
 
-O navegador só permite tocar áudio depois de um clique do jogador, então a música começa pelo botão `Música`.
+O navegador só permite tocar áudio depois de uma interação do jogador, então a música começa automaticamente no primeiro clique ou tecla dentro do jogo.
 
 Antes de publicar, registre a origem da música em `docs/asset_credits.md`.
+
+## Músicas da seleção de personagens
+
+Quando os três arquivos estiverem prontos, use estes caminhos:
+
+```text
+assets/audio/characters/dwarf-theme.mp3
+assets/audio/characters/pony-theme.mp3
+assets/audio/characters/necromancer-theme.mp3
+```
+
+Depois preencha `characterMusic` em `js/asset-config.js`:
+
+```js
+characterMusic: {
+  dwarf: 'assets/audio/characters/dwarf-theme.mp3',
+  pony: 'assets/audio/characters/pony-theme.mp3',
+  necromancer: 'assets/audio/characters/necromancer-theme.mp3'
+}
+```
+
+Enquanto esses caminhos estiverem vazios, a seleção continua usando a música do menu.
