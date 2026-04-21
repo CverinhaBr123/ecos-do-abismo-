@@ -36,6 +36,16 @@ Shift: correr
 Espaço: pulso visual de teste
 ```
 
+## Personagem no mapa
+
+O mapa já usa sprites temporários em:
+
+```text
+assets/images/map-sprites/
+```
+
+Eles são recortes das artes atuais dos heróis, pensados para validar escala, posição no tile e leitura do personagem no cenário. A próxima versão ideal é trocar esses standees por sprite sheets de caminhada com direções.
+
 ## Personalidade visual
 
 - pedra azul-esverdeada
