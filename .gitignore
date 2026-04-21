@@ -1,0 +1,18 @@
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Dependências e builds futuros
+node_modules/
+dist/
+out/
+build/
+
+# Arquivos temporários de testes locais
+*-smoke.png
+playwright-report/
+test-results/
+release/
