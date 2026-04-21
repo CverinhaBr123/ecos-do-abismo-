@@ -113,6 +113,7 @@ const STORAGE_KEY = 'ecos-do-abismo:selected-character';
 const assetConfig = window.ECOS_ASSET_CONFIG || {};
 const CUSTOM_MENU_BACKGROUND_PATH = assetConfig.customMenuBackground || 'assets/images/menu/fundo_inicial_custom.png';
 const MENU_MUSIC_PATH = assetConfig.menuMusic || 'assets/audio/menu-theme.mp3';
+const CHARACTER_MUSIC = assetConfig.characterMusic || {};
 
 const loadingScreen = document.getElementById('loading-screen');
 const menuScreen = document.getElementById('menu-screen');
@@ -137,7 +138,6 @@ const statsContainer = document.getElementById('stats');
 const backToMenu = document.getElementById('back-to-menu');
 const confirmCharacter = document.getElementById('confirm-character');
 const dontClick = document.getElementById('dont-click');
-const musicToggle = document.getElementById('music-toggle');
 const runDepth = document.getElementById('run-depth');
 const runHealth = document.getElementById('run-health');
 const runEchoes = document.getElementById('run-echoes');
@@ -158,8 +158,10 @@ const runLogList = document.getElementById('run-log-list');
 
 let selectedCharacterId = loadStoredCharacterId() || characters[0].id;
 let runState = null;
-let menuMusic = null;
-let menuMusicActive = false;
+let currentTrack = null;
+let currentTrackKey = '';
+let audioUnlocked = false;
+const audioFadeIds = new WeakMap();
 
 function setupCustomMenuBackground() {
   if (!assetConfig.enableCustomMenuBackground) return;
@@ -206,6 +208,113 @@ function showScreen(screenToShow) {
       screen.classList.remove('screen--active');
     }
   });
+
+  syncAudioForScreen(screenToShow);
+}
+
+function getCharacterMusicPath(characterId) {
+  return CHARACTER_MUSIC[characterId] || '';
+}
+
+function fadeAudio(audio, targetVolume, onComplete) {
+  clearInterval(audioFadeIds.get(audio));
+
+  const startVolume = audio.volume;
+  const steps = 12;
+  let step = 0;
+
+  const fadeId = setInterval(() => {
+    step += 1;
+    const progress = step / steps;
+    audio.volume = startVolume + (targetVolume - startVolume) * progress;
+
+    if (step >= steps) {
+      clearInterval(fadeId);
+      audioFadeIds.delete(audio);
+      audio.volume = targetVolume;
+      if (onComplete) onComplete();
+    }
+  }, 45);
+
+  audioFadeIds.set(audio, fadeId);
+}
+
+async function playTrack(trackKey, source, volume = 0.42) {
+  if (!source || !audioUnlocked) return;
+  if (currentTrackKey === trackKey && currentTrack && !currentTrack.paused) return;
+
+  const previousTrack = currentTrack;
+  if (previousTrack) {
+    fadeAudio(previousTrack, 0, () => {
+      previousTrack.pause();
+      previousTrack.currentTime = 0;
+    });
+  }
+
+  const nextTrack = new Audio(source);
+  nextTrack.loop = true;
+  nextTrack.volume = 0;
+  currentTrack = nextTrack;
+  currentTrackKey = trackKey;
+
+  try {
+    await nextTrack.play();
+    fadeAudio(nextTrack, volume);
+  } catch (error) {
+    currentTrack = null;
+    currentTrackKey = '';
+  }
+}
+
+function stopCurrentTrack() {
+  if (!currentTrack) return;
+
+  const trackToStop = currentTrack;
+  currentTrack = null;
+  currentTrackKey = '';
+  fadeAudio(trackToStop, 0, () => {
+    trackToStop.pause();
+    trackToStop.currentTime = 0;
+  });
+}
+
+function playMenuMusic() {
+  if (!assetConfig.enableMenuMusic) return;
+  playTrack('menu', MENU_MUSIC_PATH, 0.42);
+}
+
+function playSelectionMusic() {
+  const characterMusic = getCharacterMusicPath(selectedCharacterId);
+
+  if (characterMusic) {
+    playTrack(`character-${selectedCharacterId}`, characterMusic, 0.44);
+    return;
+  }
+
+  playMenuMusic();
+}
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+
+  audioUnlocked = true;
+  if (menuScreen.classList.contains('screen--active')) {
+    playMenuMusic();
+  } else if (selectionScreen.classList.contains('screen--active')) {
+    playSelectionMusic();
+  }
+}
+
+function syncAudioForScreen(screenToShow) {
+  if (!audioUnlocked) return;
+
+  if (screenToShow === menuScreen) {
+    playMenuMusic();
+  } else if (screenToShow === selectionScreen) {
+    playSelectionMusic();
+  } else if (screenToShow === runScreen) {
+    stopCurrentTrack();
+  }
 }
 
 function showToast(message) {
@@ -215,58 +324,6 @@ function showToast(message) {
   showToast.timeoutId = setTimeout(() => {
     toast.classList.remove('show');
   }, 2600);
-}
-
-function updateMusicButton() {
-  musicToggle.textContent = menuMusicActive ? 'Música: ligada' : 'Música: desligada';
-  musicToggle.setAttribute('aria-pressed', String(menuMusicActive));
-}
-
-function ensureMenuMusic() {
-  if (menuMusic) return menuMusic;
-
-  menuMusic = new Audio(MENU_MUSIC_PATH);
-  menuMusic.loop = true;
-  menuMusic.volume = 0.42;
-
-  menuMusic.addEventListener('ended', () => {
-    menuMusicActive = false;
-    updateMusicButton();
-  });
-
-  return menuMusic;
-}
-
-function pauseMenuMusic() {
-  if (!menuMusic) return;
-
-  menuMusic.pause();
-  menuMusicActive = false;
-  updateMusicButton();
-}
-
-async function toggleMenuMusic() {
-  if (!assetConfig.enableMenuMusic) {
-    showToast('Envie o MP3 para assets/audio/menu-theme.mp3 e ative a música em js/asset-config.js.');
-    return;
-  }
-
-  const audio = ensureMenuMusic();
-
-  if (menuMusicActive) {
-    pauseMenuMusic();
-    return;
-  }
-
-  try {
-    await audio.play();
-    menuMusicActive = true;
-    updateMusicButton();
-  } catch (error) {
-    menuMusicActive = false;
-    updateMusicButton();
-    showToast('Não foi possível tocar a música do menu. Confira o arquivo MP3 em assets/audio/menu-theme.mp3.');
-  }
 }
 
 function renderCharacterCards() {
@@ -290,6 +347,7 @@ function renderCharacterCards() {
       selectedCharacterId = character.id;
       renderCharacterCards();
       renderCharacterDetail();
+      playSelectionMusic();
     });
 
     characterList.appendChild(button);
@@ -421,7 +479,6 @@ function renderRunScreen() {
 function startRun(character) {
   selectedCharacterId = character.id;
   saveSelectedCharacter(character.id);
-  pauseMenuMusic();
   runState = createRunState(character);
   renderRunScreen();
   showScreen(runScreen);
@@ -491,6 +548,7 @@ function setupMenuActions() {
   });
 
   document.querySelector('[data-action="new-game"]').addEventListener('click', () => {
+    unlockAudio();
     showScreen(selectionScreen);
   });
 
@@ -507,10 +565,6 @@ function setupMenuActions() {
       { duration: 420, easing: 'ease-in-out' }
     );
     showToast('Eu avisei. Algo respondeu lá de baixo.');
-  });
-
-  musicToggle.addEventListener('click', () => {
-    toggleMenuMusic();
   });
 
   backToMenu.addEventListener('click', () => {
@@ -538,7 +592,9 @@ window.addEventListener('load', () => {
   setupCustomMenuBackground();
   renderCharacterCards();
   renderCharacterDetail();
-  updateMusicButton();
   setupMenuActions();
   startLoadingSequence();
 });
+
+window.addEventListener('pointerdown', unlockAudio, { once: true });
+window.addEventListener('keydown', unlockAudio, { once: true });
