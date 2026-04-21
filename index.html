@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ecos do Abismo</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <section id="loading-screen" class="screen screen--active">
+    <div class="loading-panel">
+      <div class="sigil"></div>
+      <p class="eyebrow">RPG Roguelike em HTML</p>
+      <h1 class="loading-title">Ecos do Abismo</h1>
+      <p id="loading-text" class="loading-text">Invocando os ecos perdidos...</p>
+      <div class="progress-track">
+        <div id="loading-bar" class="progress-bar"></div>
+      </div>
+      <p class="loading-tip">Dica: nem toda porta fechada deseja ser aberta.</p>
+    </div>
+  </section>
+
+  <main id="menu-screen" class="screen hidden">
+    <div class="background-layer"></div>
+    <div class="menu-layout">
+      <section class="menu-card glass-panel">
+        <p class="eyebrow">Menu Principal</p>
+        <h1 class="game-title"><span>Ecos do</span>Abismo</h1>
+        <div class="menu-actions">
+          <button class="menu-btn" data-action="new-game">Novo Jogo</button>
+          <button class="menu-btn" data-toast="Nenhum save foi encontrado nas ruínas... por enquanto.">Carregar Jogo</button>
+          <button class="menu-btn" data-toast="As configurações serão montadas na próxima etapa.">Configurações</button>
+          <button id="music-toggle" class="menu-btn menu-btn--audio" aria-pressed="false">Música: desligada</button>
+          <button class="menu-btn" data-toast="As conquistas ainda aguardam nas profundezas.">Conquistas</button>
+          <button class="menu-btn" data-toast="Os mistérios observam você em silêncio.">Mistérios</button>
+          <button id="dont-click" class="menu-btn menu-btn--danger">Não Clique</button>
+        </div>
+        <p class="version">build codex-ready v0.2.0</p>
+      </section>
+    </div>
+  </main>
+
+  <section id="selection-screen" class="screen hidden">
+    <div class="selection-background"></div>
+    <div class="selection-layout">
+      <header class="selection-header glass-panel">
+        <div>
+          <p class="eyebrow">Novo Jogo</p>
+          <h2>Escolha seu herói inicial</h2>
+          <p>Três estilos distintos para começar a descer o abismo.</p>
+        </div>
+        <div class="header-actions">
+          <button id="back-to-menu" class="small-btn">Voltar</button>
+        </div>
+      </header>
+
+      <div class="selection-grid">
+        <aside class="character-list glass-panel" id="character-list"></aside>
+
+        <section class="character-detail glass-panel">
+          <div class="detail-hero">
+            <div class="detail-image-wrap">
+              <img id="detail-image" class="detail-image" src="" alt="" />
+            </div>
+            <div class="detail-copy">
+              <p id="detail-role" class="eyebrow"></p>
+              <h3 id="detail-name"></h3>
+              <p id="detail-summary" class="detail-summary"></p>
+            </div>
+          </div>
+
+          <div class="detail-columns">
+            <div class="detail-block">
+              <h4>Equipamento</h4>
+              <ul class="info-list">
+                <li><strong>Arma:</strong> <span id="detail-weapon"></span></li>
+                <li><strong>Item único:</strong> <span id="detail-item"></span></li>
+              </ul>
+            </div>
+
+            <div class="detail-block">
+              <h4>Habilidades</h4>
+              <ul class="info-list">
+                <li><strong>Ativa:</strong> <span id="detail-active"></span></li>
+                <li><strong>Passiva:</strong> <span id="detail-passive"></span></li>
+                <li><strong>Ultimate:</strong> <span id="detail-ultimate"></span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="detail-columns">
+            <div class="detail-block">
+              <h4>Pontos fortes</h4>
+              <p id="detail-strength"></p>
+            </div>
+            <div class="detail-block">
+              <h4>Fraqueza</h4>
+              <p id="detail-weakness"></p>
+            </div>
+          </div>
+
+          <div class="detail-block">
+            <h4>Atributos base</h4>
+            <div id="stats" class="stats"></div>
+          </div>
+
+          <div class="detail-actions">
+            <button id="confirm-character" class="primary-btn">Confirmar personagem</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section id="run-screen" class="screen hidden">
+    <div class="run-background"></div>
+    <div class="run-layout">
+      <header class="run-hud glass-panel">
+        <div class="run-title-block">
+          <p class="eyebrow">Run em andamento</p>
+          <h2>Entrada do Abismo</h2>
+        </div>
+        <div class="resource-strip" aria-label="Estado da run">
+          <span><strong id="run-depth">1</strong> profundidade</span>
+          <span><strong id="run-health">0/0</strong> vida</span>
+          <span><strong id="run-echoes">0</strong> ecos</span>
+          <span><strong id="run-tension">0</strong> tensão</span>
+        </div>
+        <div class="header-actions">
+          <button id="run-back-selection" class="small-btn">Trocar herói</button>
+          <button id="run-return-menu" class="small-btn">Menu</button>
+        </div>
+      </header>
+
+      <div class="run-grid">
+        <aside class="run-hero glass-panel">
+          <div class="run-hero-top">
+            <img id="run-hero-image" class="run-hero-image" src="" alt="" />
+            <div>
+              <p id="run-hero-role" class="eyebrow"></p>
+              <h3 id="run-hero-name"></h3>
+              <p><strong>Item único:</strong> <span id="run-hero-item"></span></p>
+            </div>
+          </div>
+          <p id="run-hero-summary" class="run-hero-summary"></p>
+          <div id="run-hero-stats" class="mini-stats"></div>
+        </aside>
+
+        <main class="run-stage glass-panel">
+          <div class="stage-copy">
+            <p class="eyebrow">Câmara atual</p>
+            <h3 id="run-room-title">Escolha uma rota</h3>
+            <p id="run-room-description">O portal range atrás de você. À frente, três caminhos respiram como se esperassem uma decisão.</p>
+          </div>
+
+          <div id="route-grid" class="route-grid" aria-label="Rotas disponíveis"></div>
+
+          <div class="run-actions">
+            <button id="resolve-route" class="primary-btn">Explorar rota</button>
+          </div>
+        </main>
+
+        <aside class="run-log glass-panel">
+          <h3>Registro</h3>
+          <ol id="run-log-list" class="log-list"></ol>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/asset-config.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
