@@ -66,3 +66,36 @@ characterMusic: {
 ```
 
 Enquanto esses caminhos estiverem vazios, a seleção continua usando a música do menu.
+
+## Personagens animados no mapa
+
+Os arquivos atuais em `assets/images/map-sprites/` são standees temporários. Eles deixam o herói aparecer no mapa, mas não têm caminhada real por frames. Para os personagens parecerem mais vivos em 2,5D, precisamos trocar esses arquivos por sprite sheets ou sequências de frames.
+
+Pacote mínimo por personagem:
+
+```text
+idle
+walk
+run
+cast ou attack
+hit
+death
+```
+
+Direções:
+
+```text
+mínimo: 4 direções diagonais isométricas
+ideal: 8 direções
+```
+
+Recomendações técnicas:
+
+- fundo transparente
+- mesmo tamanho de frame em toda a animação
+- pés/pivô sempre no mesmo ponto
+- personagem centralizado no frame
+- sombra separada ou consistente
+- nomes previsíveis, por exemplo `dwarf_walk_se_00.png`
+
+Se o personagem for criado em 3D, o melhor caminho para este jogo 2,5D é renderizar o modelo em sprites. Assim mantemos aparência de personagem 3D, mas o jogo continua leve no navegador.
