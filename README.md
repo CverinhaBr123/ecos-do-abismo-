@@ -18,7 +18,8 @@ Esta versão do projeto já inclui:
 - 3 rotas iniciais clicáveis com risco, recompensa e resolução simples
 - preparo para GitHub Pages
 - fundo customizado opcional para a tela inicial
-- música opcional no menu principal
+- música automática no menu principal
+- preparo para músicas individuais na seleção de personagens
 
 ## Estrutura
 
@@ -39,7 +40,8 @@ ecos-do-abismo-codex/
 │        ├─ ponei_magico.png
 │        └─ necromante.png
 │  └─ audio/
-│     └─ menu-theme.mp3
+│     ├─ menu-theme.mp3
+│     └─ characters/
 ├─ docs/
 │  └─ project_state.md
 └─ legacy/
@@ -100,7 +102,17 @@ Depois ative `enableMenuMusic` em:
 js/asset-config.js
 ```
 
-O botão `Música` aparece no menu principal. O navegador só toca áudio depois de uma ação do jogador, então a trilha começa pelo clique no botão.
+O navegador só toca áudio depois de uma ação do jogador, então a trilha começa automaticamente no primeiro clique ou tecla dentro do jogo.
+
+Para músicas individuais na seleção, use estes caminhos:
+
+```text
+assets/audio/characters/dwarf-theme.mp3
+assets/audio/characters/pony-theme.mp3
+assets/audio/characters/necromancer-theme.mp3
+```
+
+Depois preencha os caminhos em `js/asset-config.js`.
 
 Registre a origem e a permissão dos assets em:
 
