@@ -412,14 +412,14 @@ img {
 .map-briefing {
   top: 18px;
   left: 18px;
-  width: min(420px, calc(100% - 36px));
-  padding: 16px 18px;
+  width: min(360px, calc(100% - 36px));
+  padding: 14px 16px;
   border-radius: 18px;
 }
 
 .map-briefing h3 {
   color: var(--gold);
-  font-size: clamp(1.45rem, 2.5vw, 2rem);
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
   margin: 7px 0 6px;
 }
 
