@@ -17,6 +17,7 @@ Esta versão do projeto já inclui:
 - HUD com profundidade, vida, ecos e tensão
 - 3 rotas iniciais clicáveis com risco, recompensa e resolução simples
 - primeiro mapa 2,5D jogável para teste de movimentação
+- arte pintada do primeiro mapa integrada ao canvas jogável
 - preparo para GitHub Pages
 - fundo customizado opcional para a tela inicial
 - música automática no menu principal
@@ -38,6 +39,8 @@ ecos-do-abismo-codex/
 │  ├─ images/
 │     ├─ menu/
 │     │  └─ tela_inicial.png
+│     ├─ maps/
+│     │  └─ atrio_correntes_map01.png
 │     ├─ map-sprites/
 │     │  ├─ dwarf.png
 │     │  ├─ pony.png
