@@ -99,3 +99,18 @@ Recomendações técnicas:
 - nomes previsíveis, por exemplo `dwarf_walk_se_00.png`
 
 Se o personagem for criado em 3D, o melhor caminho para este jogo 2,5D é renderizar o modelo em sprites. Assim mantemos aparência de personagem 3D, mas o jogo continua leve no navegador.
+
+## Arte do primeiro mapa
+
+O primeiro mapa jogável usa uma imagem pintada como base:
+
+```text
+assets/images/maps/atrio_correntes_map01.png
+```
+
+Essa imagem funciona como cenário 2,5D completo. O código cria por cima dela uma área invisível de movimento e bloqueadores para altar, mesas, baús, paredes e objetos grandes.
+
+Quando formos evoluir para combate mais preciso, existem dois caminhos:
+
+- manter a imagem única e melhorar a malha de colisão manual
+- transformar a sala em tilemap/props separados, idealmente em Phaser
