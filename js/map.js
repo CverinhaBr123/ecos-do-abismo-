@@ -4,6 +4,46 @@
   const MAP_WIDTH = 30;
   const MAP_HEIGHT = 22;
   const PASSABLE_TILES = new Set(['floor', 'cracked', 'entry', 'exit']);
+  const MAP_ART_PATH = 'assets/images/maps/atrio_correntes_map01.png';
+  const MAP_WORLD_WIDTH = 1254;
+  const MAP_WORLD_HEIGHT = 1254;
+  const MAP_DEBUG_WALKABLE = false;
+
+  const walkablePolygons = [
+    [
+      [624, 178],
+      [902, 274],
+      [1124, 428],
+      [1182, 650],
+      [1118, 785],
+      [890, 930],
+      [708, 1058],
+      [548, 1060],
+      [365, 934],
+      [126, 778],
+      [68, 632],
+      [122, 431],
+      [340, 281]
+    ]
+  ];
+
+  const blockerCircles = [
+    { x: 625, y: 585, radius: 112 },
+    { x: 850, y: 337, radius: 58 },
+    { x: 1006, y: 505, radius: 64 },
+    { x: 258, y: 706, radius: 58 },
+    { x: 337, y: 351, radius: 70 },
+    { x: 1048, y: 685, radius: 58 }
+  ];
+
+  const blockerRects = [
+    { x: 185, y: 785, width: 156, height: 86 },
+    { x: 137, y: 492, width: 88, height: 118 },
+    { x: 1014, y: 739, width: 162, height: 84 },
+    { x: 1114, y: 548, width: 96, height: 92 },
+    { x: 950, y: 284, width: 92, height: 120 },
+    { x: 246, y: 292, width: 152, height: 94 }
+  ];
 
   const characterColors = {
     dwarf: {
@@ -30,9 +70,9 @@
   };
 
   const characterSpriteSettings = {
-    dwarf: { scale: 0.72, anchorY: 230 },
-    pony: { scale: 0.7, anchorY: 224 },
-    necromancer: { scale: 0.76, anchorY: 236 }
+    dwarf: { scale: 0.48, anchorY: 230 },
+    pony: { scale: 0.47, anchorY: 224 },
+    necromancer: { scale: 0.5, anchorY: 236 }
   };
 
   const abilityConfigs = {
@@ -73,6 +113,11 @@
   let abilityCooldown = 0;
   const abilityEffects = [];
   const characterSprites = new Map();
+  const mapArt = {
+    image: null,
+    ready: false,
+    failed: false
+  };
 
   const keys = new Set();
   const camera = { x: 0, y: 0 };
@@ -151,6 +196,7 @@
 
     ctx = canvas.getContext('2d');
     activeCharacter = options.character;
+    loadMapArt();
     loadCharacterSprite(activeCharacter);
     resetPlayer(activeCharacter);
     abilityCooldown = 0;
@@ -173,21 +219,34 @@
 
   function resetPlayer(character) {
     const starts = {
-      dwarf: { x: 5.5, y: 13.5 },
-      pony: { x: 5.5, y: 12.5 },
-      necromancer: { x: 5.5, y: 14.5 }
+      dwarf: { x: 626, y: 1020 },
+      pony: { x: 596, y: 1036 },
+      necromancer: { x: 656, y: 1036 }
     };
 
     const startPosition = starts[character.id] || starts.dwarf;
     player.x = startPosition.x;
     player.y = startPosition.y;
-    player.facingX = 1;
+    player.facingX = 0;
     player.facingY = -1;
     player.moving = false;
 
-    const world = tileToWorld(player.x, player.y);
-    camera.x = world.x;
-    camera.y = world.y;
+    camera.x = player.x;
+    camera.y = player.y - 84;
+  }
+
+  function loadMapArt() {
+    if (mapArt.image || mapArt.failed) return;
+
+    const image = new Image();
+    image.onload = () => {
+      mapArt.ready = true;
+    };
+    image.onerror = () => {
+      mapArt.failed = true;
+    };
+    mapArt.image = image;
+    image.src = MAP_ART_PATH;
   }
 
   function loadCharacterSprite(character) {
@@ -285,20 +344,16 @@
     let moveY = 0;
 
     if (keys.has('w') || keys.has('arrowup')) {
-      moveX -= 1;
       moveY -= 1;
     }
     if (keys.has('s') || keys.has('arrowdown')) {
-      moveX += 1;
       moveY += 1;
     }
     if (keys.has('a') || keys.has('arrowleft')) {
       moveX -= 1;
-      moveY += 1;
     }
     if (keys.has('d') || keys.has('arrowright')) {
       moveX += 1;
-      moveY -= 1;
     }
 
     const length = Math.hypot(moveX, moveY);
@@ -310,7 +365,7 @@
       player.facingX = moveX;
       player.facingY = moveY;
 
-      const speed = keys.has('shift') ? 5.3 : 3.4;
+      const speed = keys.has('shift') ? 330 : 215;
       tryMove(moveX * speed * dt, moveY * speed * dt);
     }
 
@@ -318,9 +373,8 @@
     if (abilityCooldown > 0) abilityCooldown = Math.max(0, abilityCooldown - dt);
     updateAbilityEffects(dt);
 
-    const world = tileToWorld(player.x, player.y);
-    camera.x += (world.x - camera.x) * 0.12;
-    camera.y += (world.y - camera.y - 18) * 0.12;
+    camera.x += (player.x - camera.x) * 0.12;
+    camera.y += (player.y - 84 - camera.y) * 0.12;
     updateAbilityHud();
     updateStatus();
   }
@@ -343,13 +397,13 @@
 
   function castDwarfAbility(ability) {
     const direction = normalizedFacing();
-    const dash = 0.82;
+    const dash = 54;
     tryMove(direction.x * dash, direction.y * dash);
 
     abilityEffects.push({
       type: 'slash',
-      x: player.x + direction.x * 0.55,
-      y: player.y + direction.y * 0.55,
+      x: player.x + direction.x * 54,
+      y: player.y + direction.y * 54,
       dirX: direction.x,
       dirY: direction.y,
       age: 0,
@@ -361,7 +415,7 @@
 
   function castPonyAbility(ability) {
     const direction = normalizedFacing();
-    const dash = 0.48;
+    const dash = 34;
     tryMove(direction.x * dash, direction.y * dash);
 
     abilityEffects.push({
@@ -380,8 +434,8 @@
 
     abilityEffects.push({
       type: 'spectral-hand',
-      x: player.x + direction.x * 0.35,
-      y: player.y + direction.y * 0.35,
+      x: player.x + direction.x * 34,
+      y: player.y + direction.y * 34,
       dirX: direction.x,
       dirY: direction.y,
       age: 0,
@@ -397,7 +451,7 @@
       effect.age += dt;
 
       if (effect.type === 'spectral-hand') {
-        const speed = 5.6;
+        const speed = 360;
         effect.x += effect.dirX * speed * dt;
         effect.y += effect.dirY * speed * dt;
       }
@@ -433,31 +487,63 @@
   }
 
   function canStandAt(x, y) {
-    const radius = 0.24;
+    const radius = 19;
     const samples = [
-      [x - radius, y - radius],
-      [x + radius, y - radius],
-      [x - radius, y + radius],
-      [x + radius, y + radius],
+      [x - radius, y - radius * 0.35],
+      [x + radius, y - radius * 0.35],
+      [x - radius, y + radius * 0.35],
+      [x + radius, y + radius * 0.35],
       [x, y]
     ];
 
-    return samples.every(([sx, sy]) => PASSABLE_TILES.has(tileAt(sx, sy)));
+    return samples.every(([sx, sy]) => isPointWalkable(sx, sy));
+  }
+
+  function isPointWalkable(x, y) {
+    if (x < 0 || y < 0 || x > MAP_WORLD_WIDTH || y > MAP_WORLD_HEIGHT) return false;
+    if (!walkablePolygons.some((polygon) => pointInPolygon(x, y, polygon))) return false;
+
+    const blockedByCircle = blockerCircles.some((circle) => (
+      Math.hypot(x - circle.x, y - circle.y) <= circle.radius
+    ));
+    if (blockedByCircle) return false;
+
+    return !blockerRects.some((rect) => (
+      x >= rect.x &&
+      x <= rect.x + rect.width &&
+      y >= rect.y &&
+      y <= rect.y + rect.height
+    ));
+  }
+
+  function pointInPolygon(x, y, polygon) {
+    let inside = false;
+
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+      const xi = polygon[i][0];
+      const yi = polygon[i][1];
+      const xj = polygon[j][0];
+      const yj = polygon[j][1];
+      const crosses = ((yi > y) !== (yj > y)) &&
+        (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+      if (crosses) inside = !inside;
+    }
+
+    return inside;
   }
 
   function tileAt(x, y) {
-    const tileX = Math.floor(x);
-    const tileY = Math.floor(y);
-    if (tileX < 0 || tileY < 0 || tileX >= MAP_WIDTH || tileY >= MAP_HEIGHT) return 'void';
-    return map[tileY][tileX];
+    if (!isPointWalkable(x, y)) return 'blocked';
+    if (y < 250) return 'portao-norte';
+    if (y > 980) return 'portao-sul';
+    if (x < 180) return 'ala-oeste';
+    if (x > 1080) return 'ala-leste';
+    return 'atrio';
   }
 
   function updateStatus() {
-    const tile = tileAt(player.x, player.y);
-    const reachedExit = tile === 'exit';
-    statusText = reachedExit
-      ? 'portao leste alcancado'
-      : `x:${player.x.toFixed(1)} y:${player.y.toFixed(1)} ${player.moving ? 'movendo' : 'parado'}`;
+    const zone = tileAt(player.x, player.y);
+    statusText = `${zone} x:${Math.round(player.x)} y:${Math.round(player.y)} ${player.moving ? 'movendo' : 'parado'}`;
 
     if (statusElement) statusElement.textContent = statusText;
   }
@@ -467,28 +553,19 @@
 
     ctx.clearRect(0, 0, cssWidth, cssHeight);
     drawBackdrop();
+    drawMapArt();
+    if (MAP_DEBUG_WALKABLE) drawWalkableDebug();
 
     const drawables = [];
 
-    for (let y = 0; y < MAP_HEIGHT; y += 1) {
-      for (let x = 0; x < MAP_WIDTH; x += 1) {
-        const tile = map[y][x];
-        if (tile === 'void') continue;
-        drawables.push({
-          sort: x + y,
-          draw: () => drawTile(x, y, tile)
-        });
-      }
-    }
-
     drawables.push({
-      sort: player.x + player.y + 0.25,
+      sort: player.y + 0.25,
       draw: drawPlayer
     });
 
     abilityEffects.forEach((effect) => {
       drawables.push({
-        sort: effect.x + effect.y + 0.35,
+        sort: effect.y + 0.35,
         draw: () => drawAbilityEffect(effect)
       });
     });
@@ -514,6 +591,63 @@
       ctx.arc(x, y, 90 + i * 8, 0, Math.PI * 2);
       ctx.fill();
     }
+  }
+
+  function drawMapArt() {
+    if (!mapArt.ready || !mapArt.image) {
+      drawFallbackMapFrame();
+      return;
+    }
+
+    const topLeft = tileToScreen(0, 0);
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.58)';
+    ctx.shadowBlur = 36;
+    ctx.shadowOffsetY = 16;
+    ctx.drawImage(mapArt.image, topLeft.x, topLeft.y, MAP_WORLD_WIDTH, MAP_WORLD_HEIGHT);
+    ctx.restore();
+  }
+
+  function drawFallbackMapFrame() {
+    const topLeft = tileToScreen(0, 0);
+    ctx.fillStyle = '#10191a';
+    ctx.strokeStyle = 'rgba(134,255,248,0.22)';
+    ctx.lineWidth = 2;
+    ctx.fillRect(topLeft.x, topLeft.y, MAP_WORLD_WIDTH, MAP_WORLD_HEIGHT);
+    ctx.strokeRect(topLeft.x, topLeft.y, MAP_WORLD_WIDTH, MAP_WORLD_HEIGHT);
+  }
+
+  function drawWalkableDebug() {
+    ctx.save();
+    walkablePolygons.forEach((polygon) => {
+      const first = tileToScreen(polygon[0][0], polygon[0][1]);
+      ctx.beginPath();
+      ctx.moveTo(first.x, first.y);
+      polygon.slice(1).forEach(([x, y]) => {
+        const point = tileToScreen(x, y);
+        ctx.lineTo(point.x, point.y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(134,255,248,0.14)';
+      ctx.strokeStyle = 'rgba(134,255,248,0.42)';
+      ctx.fill();
+      ctx.stroke();
+    });
+
+    blockerCircles.forEach((circle) => {
+      const point = tileToScreen(circle.x, circle.y);
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, circle.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,92,92,0.16)';
+      ctx.fill();
+    });
+
+    blockerRects.forEach((rect) => {
+      const point = tileToScreen(rect.x, rect.y);
+      ctx.fillStyle = 'rgba(255,92,92,0.16)';
+      ctx.fillRect(point.x, point.y, rect.width, rect.height);
+    });
+    ctx.restore();
   }
 
   function drawTile(x, y, type) {
@@ -667,7 +801,7 @@
   function drawSlashEffect(effect) {
     const progress = effect.age / effect.duration;
     const point = tileToScreen(effect.x, effect.y);
-    const angle = Math.atan2(effect.dirY + effect.dirX, effect.dirX - effect.dirY);
+    const angle = Math.atan2(effect.dirY, effect.dirX);
     const alpha = 1 - progress;
 
     ctx.save();
@@ -856,8 +990,8 @@
 
   function tileToWorld(x, y) {
     return {
-      x: (x - y) * (TILE_WIDTH / 2),
-      y: (x + y) * (TILE_HEIGHT / 2)
+      x,
+      y
     };
   }
 
