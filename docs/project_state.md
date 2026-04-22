@@ -31,7 +31,8 @@ RPG roguelike em HTML.
 - arquivos de preparo para GitHub Pages
 - movimento por teclado no primeiro mapa
 - câmera seguindo o jogador
-- colisão básica com paredes, pilares, braseiros e abismos
+- primeiro mapa com arte 2,5D pintada em `assets/images/maps/atrio_correntes_map01.png`
+- colisão básica por malha invisível sobre a arte do mapa
 - primeiras habilidades lançáveis no mapa com `J`, `1` ou `Espaço`
 - HUD de habilidade com nome e cooldown
 
