@@ -13,21 +13,23 @@ Primeiro mapa jogável para testar:
 
 ## Fantasia
 
-O Átrio das Correntes é uma antecâmara em ruínas logo depois do portal inicial. A sala tem uma passarela central de pedra quebrada, abismos nas laterais, pilares antigos, braseiros acesos e um portão leste preso por correntes.
+O Átrio das Correntes é uma antecâmara em ruínas logo depois do portal inicial. A sala tem entrada sul, altar central, paredes altas, braseiros, correntes antigas e um portão norte com brilho frio.
 
 ## Tamanho
 
-Grade lógica atual:
+Arte base atual:
 
 ```text
-30 colunas x 22 linhas
+assets/images/maps/atrio_correntes_map01.png
 ```
 
-Cada tile é desenhado em projeção isométrica/2,5D:
+Dimensão da arte e do mundo jogável:
 
 ```text
-76px x 38px
+1254px x 1254px
 ```
+
+O mapa usa a imagem como camada visual principal e uma malha invisível de navegação por cima. Isso permite testar movimento, câmera, bloqueios e habilidades antes de transformar a arte em tilemap real.
 
 ## Controles atuais
 
@@ -87,7 +89,7 @@ formato: PNG ou WebP com fundo transparente
 - pedra azul-esverdeada
 - brilho frio vindo do fundo do abismo
 - braseiros alaranjados como contraste
-- pilares e paredes elevadas para sensação 2,5D
+- paredes, portões, altar e objetos elevados para sensação 2,5D
 - névoa e vinheta para esconder bordas duras do protótipo
 
 ## Próximos passos do mapa
